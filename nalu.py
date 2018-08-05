@@ -10,6 +10,7 @@ from keras.utils.generic_utils import get_custom_objects
 
 class NALU(Layer):
     def __init__(self, units,
+                 use_gating=True,
                  kernel_W_initializer='glorot_uniform',
                  kernel_M_initializer='glorot_uniform',
                  gate_initializer='glorot_uniform',
@@ -25,6 +26,8 @@ class NALU(Layer):
 
         # Arguments:
             units: Output dimension.
+            use_gating: Bool, determines whether to use the gating
+                mechanism between W and m.
             kernel_W_initializer: Initializer for `W` weights.
             kernel_M_initializer: Initializer for `M` weights.
             gate_initializer: Initializer for gate `G` weights.
@@ -42,6 +45,7 @@ class NALU(Layer):
         """
         super(NALU, self).__init__()
         self.units = units
+        self.use_gating = use_gating
         self.epsilon = epsilon
 
         self.kernel_W_initializer = initializers.get(kernel_W_initializer)
@@ -72,11 +76,14 @@ class NALU(Layer):
                                      regularizer=self.kernel_M_regularizer,
                                      constraint=self.kernel_M_constraint)
 
-        self.G = self.add_weight(shape=(input_dim, self.units),
-                                 name='G',
-                                 initializer=self.gate_initializer,
-                                 regularizer=self.gate_regularizer,
-                                 constraint=self.gate_constraint)
+        if self.use_gating:
+            self.G = self.add_weight(shape=(input_dim, self.units),
+                                     name='G',
+                                     initializer=self.gate_initializer,
+                                     regularizer=self.gate_regularizer,
+                                     constraint=self.gate_constraint)
+        else:
+            self.G = None
 
         self.input_spec = InputSpec(min_ndim=2, axes={-1: input_dim})
         self.built = True
@@ -84,10 +91,14 @@ class NALU(Layer):
     def call(self, inputs, **kwargs):
         W = K.tanh(self.W_hat) * K.sigmoid(self.M_hat)
         m = K.exp(K.dot(K.log(K.abs(inputs) + self.epsilon), W))
-        g = K.sigmoid(K.dot(inputs, self.G))
         a = K.dot(inputs, W)
 
-        outputs = g * a + (1. - g) * m
+        if self.use_gating:
+            g = K.sigmoid(K.dot(inputs, self.G))
+            outputs = g * a + (1. - g) * m
+        else:
+            outputs = a + m
+
         return outputs
 
     def compute_output_shape(self, input_shape):
@@ -100,6 +111,7 @@ class NALU(Layer):
     def get_config(self):
         config = {
             'units': self.units,
+            'use_gating': self.use_gating,
             'kernel_W_initializer': initializers.serialize(self.kernel_W_initializer),
             'kernel_M_initializer': initializers.serialize(self.kernel_M_initializer),
             'gate_initializer': initializers.serialize(self.gate_initializer),
