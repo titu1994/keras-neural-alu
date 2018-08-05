@@ -42,9 +42,9 @@ This is possibly due to the way I compute the extrapolated set as the double of 
 |-----------|------------|------------------------|
 |  a + b    | 0.0        |       0.0              |
 |  a - b    | 0.0        |       0.0              |
-|  a * b    | ** > 1e5 ** |      ** > 1e5 **      |
+|  a * b    | **> 1e5** |      **> 1e5**      |
 |  a / b    | 0.006      |       0.0308           |
-|  a ^ 2    | ** > 1e5** |       ** > 1e5 **        |
+|  a ^ 2    | **> 1e5** |       **> 1e5**        |
 |  sqrt (a) | 0.001      |       0.035            |
 
 # Requirements
