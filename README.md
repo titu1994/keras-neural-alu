@@ -1,6 +1,24 @@
 # Keras Neural Arithmatic and Logical Unit (NALU)
 A Keras implementation of Neural Arithmatic and Logical Unit from the paper [Neural Arithmetic Logic Units](https://arxiv.org/abs/1808.00508).
 
+Contains the layers for `Neural Arithmatic Logic Unit (NALU)` and `Neural Accumulator (NAC)`.
+
+# Usage
+
+Simply add them as normal layers after importing `nalu.py` or `nac.py`.
+
+```python
+from nalu import NALU
+
+
+ip = Input(...)
+x = NALU(10)(ip)
+...
+```
+
+## Note
+Generally, NALU does **not** use an activation function after its output - though they may be applied anyway.
+
 # Static Toy Experiments
 The static toy test is implemented inside the `experiments` folder, though it is not an exact replica of the paper as the details about how much the extrapolated dataset deviates from the train set is somewhat vague (the paper only mentions that at least one of `a`, `b` and `y` are increased in the extrapolated set, but not by how much and what mechanism.
 
@@ -12,7 +30,7 @@ Allmost all task are performed and weights are provided. Several obtain scores s
 
 This is possibly due to the way I compute the extrapolated set as the double of `a`, which after squaring is `4 * a`.
 
-# Results
+## Results
 
 ---------------------------------------------------
 | Operation | Train Loss | Extrapolated Test Loss |

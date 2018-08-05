@@ -8,51 +8,40 @@ from keras import backend as K
 from keras.utils.generic_utils import get_custom_objects
 
 
-class NALU(Layer):
+class NAC(Layer):
     def __init__(self, units,
                  kernel_W_initializer='glorot_uniform',
                  kernel_M_initializer='glorot_uniform',
-                 gate_initializer='glorot_uniform',
                  kernel_W_regularizer=None,
                  kernel_M_regularizer=None,
-                 gate_regularizer=None,
                  kernel_W_constraint=None,
-                 kernel_M_constraint=None,
-                 gate_constraint=None,
-                 epsilon=1e-7):
+                 kernel_M_constraint=None):
         """
-        Neural Arithmatic and Logical Unit.
+        Neural Accumulator.
 
         # Arguments:
             units: Output dimension.
             kernel_W_initializer: Initializer for `W` weights.
             kernel_M_initializer: Initializer for `M` weights.
-            gate_initializer: Initializer for gate `G` weights.
             kernel_W_regularizer: Regularizer for `W` weights.
             kernel_M_regularizer: Regularizer for `M` weights.
-            gate_regularizer: Regularizer for gate `G` weights.
             kernel_W_constraint: Constraints on `W` weights.
             kernel_M_constraint: Constraints on `M` weights.
-            gate_constraint: Constraints on gate `G` weights.
             epsilon: Small factor to prevent log 0.
 
         # Reference:
         - [Neural Arithmetic Logic Units](https://arxiv.org/abs/1808.00508)
 
         """
-        super(NALU, self).__init__()
+        super(NAC, self).__init__()
         self.units = units
-        self.epsilon = epsilon
 
         self.kernel_W_initializer = initializers.get(kernel_W_initializer)
         self.kernel_M_initializer = initializers.get(kernel_M_initializer)
-        self.gate_initializer = initializers.get(gate_initializer)
         self.kernel_W_regularizer = regularizers.get(kernel_W_regularizer)
         self.kernel_M_regularizer = regularizers.get(kernel_M_regularizer)
-        self.gate_regularizer = regularizers.get(gate_regularizer)
         self.kernel_W_constraint = constraints.get(kernel_W_constraint)
         self.kernel_M_constraint = constraints.get(kernel_M_constraint)
-        self.gate_constraint = constraints.get(gate_constraint)
 
         self.supports_masking = True
 
@@ -72,23 +61,13 @@ class NALU(Layer):
                                      regularizer=self.kernel_M_regularizer,
                                      constraint=self.kernel_M_constraint)
 
-        self.G = self.add_weight(shape=(input_dim, self.units),
-                                 name='G',
-                                 initializer=self.gate_initializer,
-                                 regularizer=self.gate_regularizer,
-                                 constraint=self.gate_constraint)
-
         self.input_spec = InputSpec(min_ndim=2, axes={-1: input_dim})
         self.built = True
 
     def call(self, inputs, **kwargs):
         W = K.tanh(self.W_hat) * K.sigmoid(self.M_hat)
-        m = K.exp(K.dot(K.log(K.abs(inputs) + self.epsilon), W))
-        g = K.sigmoid(K.dot(inputs, self.G))
         a = K.dot(inputs, W)
-
-        outputs = g * a + (1. - g) * m
-        return outputs
+        return a
 
     def compute_output_shape(self, input_shape):
         assert input_shape and len(input_shape) >= 2
@@ -102,18 +81,14 @@ class NALU(Layer):
             'units': self.units,
             'kernel_W_initializer': initializers.serialize(self.kernel_W_initializer),
             'kernel_M_initializer': initializers.serialize(self.kernel_M_initializer),
-            'gate_initializer': initializers.serialize(self.gate_initializer),
             'kernel_W_regularizer': regularizers.serialize(self.kernel_W_regularizer),
             'kernel_M_regularizer': regularizers.serialize(self.kernel_M_regularizer),
-            'gate_regularizer': regularizers.serialize(self.gate_regularizer),
             'kernel_W_constraint': constraints.serialize(self.kernel_W_constraint),
             'kernel_M_constraint': constraints.serialize(self.kernel_M_constraint),
-            'gate_constraint': constraints.serialize(self.gate_constraint),
-            'epsilon': self.epsilon
         }
 
-        base_config = super(NALU, self).get_config()
+        base_config = super(NAC, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
 
-get_custom_objects().update({'NALU': NALU})
+get_custom_objects().update({'NAC': NAC})
