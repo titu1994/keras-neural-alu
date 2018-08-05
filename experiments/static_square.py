@@ -23,7 +23,7 @@ task_name = 'square'
 task_fn = lambda x, y: x * x
 
 # generate the model
-ip = Input(shape=(2,))
+ip = Input(shape=(100,))
 x = NALU(units)(ip)
 x = NALU(1)(x)
 

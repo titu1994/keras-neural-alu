@@ -1,7 +1,7 @@
 import numpy as np
 from keras.models import Model
 from keras.layers import Input
-from keras.optimizers import Adam
+from keras.optimizers import Adam, RMSprop
 from keras.callbacks import ModelCheckpoint
 
 import os
@@ -21,17 +21,17 @@ num_samples = 1000
 
 # task
 task_name = 'division'
-task_fn = lambda x, y: x / (y + 1e-2)
+task_fn = lambda x, y: x / y
 
 # generate the model
-ip = Input(shape=(2,))
+ip = Input(shape=(100,))
 x = NALU(units)(ip)
 x = NALU(1)(x)
 
 model = Model(ip, x)
 model.summary()
 
-optimizer = Adam(0.1)  # Adam seems to do better here
+optimizer = RMSprop(0.02)  # Adam seems to do better here
 model.compile(optimizer, 'mse')
 
 # Generate the datasets
@@ -46,7 +46,7 @@ checkpoint = ModelCheckpoint(weights_path, monitor='val_loss',
 callbacks = [checkpoint]
 
 # Train model
-model.fit(X_train, y_train, batch_size=64, epochs=2000,
+model.fit(X_train, y_train, batch_size=64, epochs=1000,
           verbose=2, callbacks=callbacks, validation_data=(X_test, y_test))
 
 # Evaluate

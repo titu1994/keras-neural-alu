@@ -23,14 +23,14 @@ task_name = 'subtraction'
 task_fn = lambda x, y: x - y
 
 # generate the model
-ip = Input(shape=(2,))
+ip = Input(shape=(100,))
 x = NALU(units)(ip)
 x = NALU(1)(x)
 
 model = Model(ip, x)
 model.summary()
 
-optimizer = RMSprop(0.1)
+optimizer = RMSprop(0.2)
 model.compile(optimizer, 'mse')
 
 # Generate the datasets
@@ -45,7 +45,7 @@ checkpoint = ModelCheckpoint(weights_path, monitor='val_loss',
 callbacks = [checkpoint]
 
 # Train model
-model.fit(X_train, y_train, batch_size=64, epochs=500,
+model.fit(X_train, y_train, batch_size=64, epochs=1000,
           verbose=2, callbacks=callbacks, validation_data=(X_test, y_test))
 
 # Evaluate

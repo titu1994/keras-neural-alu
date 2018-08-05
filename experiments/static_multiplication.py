@@ -23,7 +23,7 @@ task_name = 'multiplication'
 task_fn = lambda x, y: x * y
 
 # generate the model
-ip = Input(shape=(2,))
+ip = Input(shape=(100,))
 x = NALU(units)(ip)
 x = NALU(1)(x)
 
