@@ -15,7 +15,8 @@ class NAC(Layer):
                  kernel_W_regularizer=None,
                  kernel_M_regularizer=None,
                  kernel_W_constraint=None,
-                 kernel_M_constraint=None):
+                 kernel_M_constraint=None,
+                 **kwargs):
         """
         Neural Accumulator.
 

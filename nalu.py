@@ -20,7 +20,8 @@ class NALU(Layer):
                  kernel_W_constraint=None,
                  kernel_M_constraint=None,
                  gate_constraint=None,
-                 epsilon=1e-7):
+                 epsilon=1e-7,
+                 **kwargs):
         """
         Neural Arithmatic and Logical Unit.
 
